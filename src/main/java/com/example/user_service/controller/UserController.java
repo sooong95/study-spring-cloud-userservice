@@ -1,6 +1,7 @@
 package com.example.user_service.controller;
 
 import com.example.user_service.dto.UserDto;
+import com.example.user_service.entity.UserEntity;
 import com.example.user_service.service.UserService;
 import com.example.user_service.vo.Greeting;
 import com.example.user_service.vo.RequestUser;
@@ -14,12 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
-@RequestMapping("/")
+@RequestMapping("/user-service")
 @RequiredArgsConstructor
 public class UserController {
 
-    private Environment env;
+    private final Environment env;
     private final UserService userService;
 
     @Autowired
@@ -27,7 +31,7 @@ public class UserController {
 
     @GetMapping("/health_check")
     public String status() {
-        return "It's Working in User Service";
+        return String.format("It's Working in User Service on PORT %s", env.getProperty("local.server.port"));
     }
 
     @GetMapping("/welcome")
@@ -46,5 +50,22 @@ public class UserController {
 
         ResponseUser responseUser = mapper.map(userDto, ResponseUser.class);
         return new ResponseEntity<>(responseUser, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<?> getUsers() {
+        Iterable<UserEntity> userList = userService.getUserByAll();
+        List<ResponseUser> result = new ArrayList<>();
+        userList.forEach(v -> {
+            result.add(new ModelMapper().map(v, ResponseUser.class));
+        });
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<?> getUser(@PathVariable("userId") String userId) {
+        UserDto userDto = userService.getUserByUserId(userId);
+
+        return new ResponseEntity<>(new ModelMapper().map(userDto, ResponseUser.class), HttpStatus.OK);
     }
 }
