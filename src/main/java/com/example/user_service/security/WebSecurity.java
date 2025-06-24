@@ -7,13 +7,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurity {
 
+    private final String MY_IP = "122.45.189.60";
+
     private static final String[] WHITE_LIST = {
-            "/users/**",
             "/**"
     };
 
@@ -25,7 +27,10 @@ public class WebSecurity {
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(WHITE_LIST).permitAll()
+                        .requestMatchers(WHITE_LIST)
+                        .access(new WebExpressionAuthorizationManager(
+                                "hasIpAddress('127.0.0.1') or hasIpAddress('::1') or hasIpAddress('" + MY_IP + "')"
+                        ))
                         .anyRequest().authenticated()
                 );
         return http.build();
