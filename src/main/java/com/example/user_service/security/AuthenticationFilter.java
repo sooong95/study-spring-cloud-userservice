@@ -1,3 +1,4 @@
+/*
 package com.example.user_service.security;
 
 import com.example.user_service.vo.RequestLogin;
@@ -40,3 +41,4 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         super.successfulAuthentication(request, response, chain, authResult);
     }
 }
+*/
